@@ -258,6 +258,113 @@
         }
     </style>
 </head>
+    <script>
+    // Spørsmålene
+    const questions = [
+        {
+            id: 1,
+            text: "Hvilke porter må være åpne i brannmuren for å motta lyd fra en Tieline Via enhet?",
+            allowImage: true
+        },
+        {
+            id: 2,
+            text: "Hvordan verifiserer du at du mottar lyd fra en Prodys Quantum sender?",
+            allowImage: true
+        },
+        {
+            id: 3,
+            text: "Hva gjør du hvis lydstrømmen fra en Tieline Via plutselig forsvinner?",
+            allowImage: true
+        }
+    ];
+
+    // Config for sikkerhet
+    const CONFIG = {
+        maxFileSize: 5 * 1024 * 1024, // 5MB
+        allowedImageTypes: ['image/jpeg', 'image/png', 'image/gif'],
+        maxAnswerLength: 2000,
+        maxGroupNameLength: 50
+    };
+
+    // Oppretter spørsmålskort
+    function createQuestionCard(question, index) {
+        const card = document.createElement('div');
+        card.className = 'question-card';
+        card.innerHTML = `
+            <div class="question-header">
+                <div class="question-number">${index + 1}</div>
+                <div class="question-text">${question.text}</div>
+            </div>
+            <textarea 
+                id="answer-${question.id}"
+                placeholder="Skriv svaret ditt her..."
+                maxlength="${CONFIG.maxAnswerLength}"
+            ></textarea>
+            ${question.allowImage ? `
+                <div class="image-upload" onclick="triggerFileUpload(${question.id})">
+                    <p>Klikk eller dra og slipp bilde her</p>
+                    <input 
+                        type="file" 
+                        id="file-${question.id}"
+                        style="display: none"
+                        accept="image/*"
+                        onchange="handleFileUpload(${question.id})"
+                    >
+                </div>
+                <div id="preview-${question.id}"></div>
+            ` : ''}
+        `;
+        return card;
+    }
+
+    // Fil opplasting
+    function triggerFileUpload(id) {
+        document.getElementById(`file-${id}`).click();
+    }
+
+    function handleFileUpload(id) {
+        const file = document.getElementById(`file-${id}`).files[0];
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                showPreview(id, e.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function showPreview(id, src) {
+        const preview = document.getElementById(`preview-${id}`);
+        preview.innerHTML = `<img src="${src}" class="preview-image" alt="Opplastet bilde">`;
+    }
+
+    // Validering og print
+    function validateAndPrint() {
+        const groupName = document.getElementById('groupName').value;
+        if (!groupName) {
+            alert('Vennligst fyll ut gruppenavn');
+            return;
+        }
+        window.print();
+    }
+
+    // Initialisering av quiz
+    function initQuiz() {
+        const container = document.getElementById('questionContainer');
+        
+        // Legger til spørsmål
+        questions.forEach((question, index) => {
+            container.appendChild(createQuestionCard(question, index));
+        });
+        
+        // Setter dagens dato
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('date').value = today;
+    }
+
+    // Starter quizen når siden er lastet
+    document.addEventListener('DOMContentLoaded', initQuiz);
+</script>
 <body>
     <div class="container">
         <header class="header">

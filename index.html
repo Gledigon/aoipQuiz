@@ -17,8 +17,6 @@
             --text-secondary: #cbd5e1;
             --accent-blue: #3b82f6;
             --accent-purple: #8b5cf6;
-            --accent-pink: #ec4899;
-            --accent-green: #22c55e;
             --gradient: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
         }
 
@@ -187,7 +185,6 @@
             justify-content: flex-end;
         }
 
-        /* Print styles */
         @media print {
             body {
                 background: white;
@@ -219,17 +216,6 @@
                 margin-bottom: 2rem;
             }
 
-            .form-group label {
-                color: black;
-            }
-
-            .form-group input {
-                background: white;
-                border: 1px solid #ccc;
-                color: black;
-                padding: 0.5rem;
-            }
-
             .question-card {
                 background: white;
                 border: 1px solid #ccc;
@@ -237,12 +223,6 @@
                 margin-bottom: 2rem;
                 break-inside: avoid;
                 page-break-inside: avoid;
-            }
-
-            .question-number {
-                border: 2px solid black;
-                color: black !important;
-                background: white !important;
             }
 
             .question-text {
@@ -253,8 +233,6 @@
                 background: white;
                 border: 1px solid #ccc;
                 color: black;
-                min-height: auto;
-                height: auto;
             }
 
             .btn-group,
@@ -266,15 +244,6 @@
                 max-width: 500px;
                 max-height: 300px;
                 margin: 1rem 0;
-                page-break-inside: avoid;
-            }
-
-            .question-card {
-                page-break-inside: avoid;
-            }
-
-            h1, h2, h3 {
-                page-break-after: avoid;
             }
         }
 
@@ -285,10 +254,6 @@
 
             .btn-group {
                 flex-direction: column;
-            }
-
-            .header h1 {
-                font-size: 2rem;
             }
         }
     </style>
@@ -335,10 +300,7 @@
         </form>
     </div>
 
-    <!-- Previous secure JavaScript code remains the same -->
     <script>
-        // [Previous secure JavaScript code from the last version]
-        // Security configuration
         const CONFIG = {
             maxFileSize: 5 * 1024 * 1024, // 5MB
             allowedImageTypes: ['image/jpeg', 'image/png', 'image/gif'],
@@ -346,8 +308,23 @@
             maxGroupNameLength: 50
         };
 
-        // Previous secure JavaScript functions...
-        // [Include all the secure JavaScript functions from the previous version]
+        const questions = [
+            {
+                id: 1,
+                text: "Hvilke porter må være åpne i brannmuren for å motta lyd fra en Tieline Via enhet?",
+                allowImage: true
+            },
+            {
+                id: 2,
+                text: "Hvordan verifiserer du at du mottar lyd fra en Prodys Quantum sender?",
+                allowImage: true
+            },
+            {
+                id: 3,
+                text: "Hva gjør du hvis lydstrømmen fra en Tieline Via plutselig forsvinner?",
+                allowImage: true
+            }
+        ];
 
         function sanitizeInput(element) {
             const clean = element.value.replace(/[<>]/g, '');
@@ -366,7 +343,7 @@
         }
 
         function validateForm(event) {
-            event.preventDefault();
+            if (event) event.preventDefault();
             
             const groupName = document.getElementById('groupName').value;
             const date = document.getElementById('date').value;
@@ -384,13 +361,23 @@
             let valid = true;
             questions.forEach(q => {
                 const answer = document.getElementById(`answer-${q.id}`).value;
-                if (answer.length > CONFIG.maxAnswerLength) {
+                if (answer && answer.length > CONFIG.maxAnswerLength) {
                     alert(`Svaret på spørsmål ${q.id} er for langt. Maksimal lengde er ${CONFIG.maxAnswerLength} tegn.`);
                     valid = false;
                 }
             });
 
             return valid;
+        }
+
+        function validateAndPrint() {
+            if (validateForm()) {
+                window.print();
+            }
+        }
+
+        function triggerFileUpload(id) {
+            document.getElementById(`file-${id}`).click();
         }
 
         function handleFileUpload(id) {
@@ -434,24 +421,6 @@
             }
         }
 
-        const questions = [
-            {
-                id: 1,
-                text: "Hvilke porter må være åpne i brannmuren for å motta lyd fra en Tieline Via enhet?",
-                allowImage: true
-            },
-            {
-                id: 2,
-                text: "Hvordan verifiserer du at du mottar lyd fra en Prodys Quantum sender?",
-                allowImage: true
-            },
-            {
-                id: 3,
-                text: "Hva gjør du hvis lydstrømmen fra en Tieline Via plutselig forsvinner?",
-                allowImage: true
-            }
-        ].map(q => ({...q, text: escapeHtml(q.text)}));
-
         function createQuestionCard(question, index) {
             const card = document.createElement('div');
             card.className = 'question-card';
@@ -470,3 +439,39 @@
                 ></textarea>
                 ${question.allowImage ? `
                     <div class="image-upload" onclick="triggerFileUpload(${question.id})">
+                        <p>Klikk eller dra og slipp bilde her (Maks ${CONFIG.maxFileSize / 1024 / 1024}MB)</p>
+                        <input 
+                            type="file" 
+                            id="file-${question.id}"
+                            accept="${CONFIG.allowedImageTypes.join(',')}"
+                            style="display: none"
+                            onchange="handleFileUpload(${question.id})"
+                        >
+                    </div>
+                    <div id="preview-${question.id}"></div>
+                ` : ''}
+            `;
+            
+            card.innerHTML = content;
+            return card;
+        }
+
+        function initQuiz() {
+            const container = document.getElementById('questionContainer');
+            questions.forEach((question, index) => {
+                container.appendChild(createQuestionCard(question, index));
+            });
+            
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').value = today;
+            }
+
+        // Initialize quiz when document is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initQuiz);
+        } else {
+            initQuiz();
+        }
+    </script>
+</body>
+</html>
